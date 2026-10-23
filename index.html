@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Handwritten Letter</title>
+<title>Private Letter</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Kalam:wght@300;400&display=swap" rel="stylesheet">
 
@@ -20,9 +20,66 @@ body {
     color: #e8e2d8;
     font-family: 'Kalam', cursive;
     font-style: italic;
+}
+
+#lockScreen {
+    min-height: 100vh;
     display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 24px;
+}
+
+#lockScreen h2 {
+    font-weight: 300;
+    letter-spacing: 2px;
+    margin-bottom: 25px;
+}
+
+#password {
+    width: 240px;
+    padding: 13px;
+    background: #080808;
+    border: 1px solid #555;
+    border-radius: 4px;
+    outline: none;
+    color: #e8e2d8;
+    font: 16px Arial, sans-serif;
+    text-align: center;
+    letter-spacing: 5px;
+}
+
+#password:focus {
+    border-color: #c9b58b;
+}
+
+#unlock {
+    margin-top: 18px;
+    padding: 10px 32px;
+    background: transparent;
+    color: #e8e2d8;
+    border: 1px solid #777;
+    cursor: pointer;
+    font: 14px Arial, sans-serif;
+    letter-spacing: 2px;
+}
+
+#unlock:hover {
+    border-color: #e8e2d8;
+}
+
+#error {
+    color: #c98b8b;
+    font: 13px Arial, sans-serif;
+    margin-top: 15px;
+}
+
+#letterScreen {
+    display: none;
     justify-content: center;
     padding: 35px 16px;
+    min-height: 100vh;
 }
 
 .letter {
@@ -47,9 +104,7 @@ body {
 }
 
 @keyframes blink {
-    50% {
-        opacity: 0;
-    }
+    50% { opacity: 0; }
 }
 
 @media (max-width: 500px) {
@@ -63,11 +118,31 @@ body {
 
 <body>
 
-<div class="letter">
-    <div id="content"></div><span class="cursor" id="cursor"></span>
+<!-- Password Screen -->
+<div id="lockScreen">
+    <h2>A Private Letter</h2>
+
+    <input
+        id="password"
+        type="password"
+        placeholder="Enter password"
+        autocomplete="off"
+    >
+
+    <button id="unlock">UNLOCK</button>
+    <p id="error"></p>
+</div>
+
+<!-- Letter Screen -->
+<div id="letterScreen">
+    <div class="letter">
+        <div id="content"></div><span class="cursor" id="cursor"></span>
+    </div>
 </div>
 
 <script>
+const correctPassword = "2322007";
+
 const letter = `Dear Friend,
 
 I hope you are doing well. I wanted to write this letter because sometimes it is easier to express our feelings through words.
@@ -83,10 +158,27 @@ Take care of yourself.
 With best wishes,
 Your Friend`;
 
+const lockScreen = document.getElementById("lockScreen");
+const letterScreen = document.getElementById("letterScreen");
+const passwordInput = document.getElementById("password");
+const error = document.getElementById("error");
 const output = document.getElementById("content");
 const cursor = document.getElementById("cursor");
 
 let index = 0;
+
+function unlockLetter() {
+    if (passwordInput.value === correctPassword) {
+        lockScreen.style.display = "none";
+        letterScreen.style.display = "flex";
+        error.textContent = "";
+        writeLetter();
+    } else {
+        error.textContent = "Incorrect password. Try again.";
+        passwordInput.value = "";
+        passwordInput.focus();
+    }
+}
 
 function writeLetter() {
     if (index < letter.length) {
@@ -94,12 +186,13 @@ function writeLetter() {
         index++;
 
         let delay = 42;
+        const char = letter[index - 1];
 
-        if (".!?".includes(letter[index - 1])) {
+        if (".!?".includes(char)) {
             delay = 300;
-        } else if (letter[index - 1] === "\n") {
+        } else if (char === "\n") {
             delay = 180;
-        } else if (letter[index - 1] === ",") {
+        } else if (char === ",") {
             delay = 150;
         }
 
@@ -109,7 +202,14 @@ function writeLetter() {
     }
 }
 
-writeLetter();
+document.getElementById("unlock")
+    .addEventListener("click", unlockLetter);
+
+passwordInput.addEventListener("keydown", function(event) {
+    if (event.key === "Enter") {
+        unlockLetter();
+    }
+});
 </script>
 
 </body>
